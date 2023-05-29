@@ -2,6 +2,7 @@ import { FastifyInstance } from 'fastify'
 import axios from 'axios'
 import { z } from 'zod'
 import { getUserByGithubId, createUser } from '../dao/UserPrisma'
+import { User } from '@prisma/client'
 
 const userRegisterSchema = z.object({
   id: z.number(),
@@ -27,8 +28,10 @@ export async function authRoutes(app: FastifyInstance) {
 
     const user = await getUser(userInfo)
 
+    const token = getJWToken(app, user)
+
     return {
-      user,
+      token,
     }
   })
 }
@@ -62,4 +65,17 @@ async function getUser(userInfo: UserRegister) {
   }
 
   return user
+}
+
+function getJWToken(app: FastifyInstance, user: User) {
+  return app.jwt.sign(
+    {
+      name: user.name,
+      avatarUrl: user.avatarUrl,
+    },
+    {
+      sub: user.id,
+      expiresIn: '30 days',
+    },
+  )
 }
