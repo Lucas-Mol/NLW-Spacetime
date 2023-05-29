@@ -1,99 +1,123 @@
 import { FastifyInstance } from 'fastify'
 import { z } from 'zod'
-import { prisma } from '../lib/prisma'
+import {
+  getMemoriesByUserId,
+  createMemory,
+  updateMemory,
+  getMemoryByIdOrThrow,
+  removeMemory,
+} from '../dao/MemoryPrisma'
 
 export async function memoriesRoutes(app: FastifyInstance) {
-  app.get('/memories', async () => {
-    const memories = await prisma.memory.findMany({
-      orderBy: { createdAt: 'asc' },
-    })
+  app.addHook('preHandler', async (request) => {
+    await request.jwtVerify()
+  })
 
-    return memories.map((memory) => {
-      return {
-        id: memory.id,
-        coverUrl: memory.coverUrl,
-        excerpt: memory.content.substring(0, 115).concat('...'),
+  getMemories()
+
+  getMemoryById()
+
+  postMemory()
+
+  putMemory()
+
+  deleteMemory()
+
+  function getMemories() {
+    return app.get('/memories', async (request) => {
+      const user = request.user
+
+      const memories = await getMemoriesByUserId(user.sub)
+
+      return memories.map((memory) => {
+        return {
+          id: memory.id,
+          coverUrl: memory.coverUrl,
+          excerpt: memory.content.substring(0, 115).concat('...'),
+        }
+      })
+    })
+  }
+
+  function getMemoryById() {
+    return app.get('/memories/:id', async (request, reply) => {
+      const paramSchema = z.object({
+        id: z.string().uuid(),
+      })
+
+      const { id } = paramSchema.parse(request.params)
+
+      const memory = await getMemoryByIdOrThrow(id)
+
+      if (!memory.isPublic && memory.userId !== request.user.sub) {
+        return reply.status(401).send()
       }
+
+      return memory
     })
-  })
+  }
 
-  app.get('/memories/:id', async (request) => {
-    const paramSchema = z.object({
-      id: z.string().uuid(),
+  function postMemory() {
+    return app.post('/memories', async (request) => {
+      const bodySchema = z.object({
+        content: z.string(),
+        coverUrl: z.string(),
+        isPublic: z.coerce.boolean().default(false),
+      })
+
+      const { content, coverUrl, isPublic } = bodySchema.parse(request.body)
+
+      const userId = request.user.sub
+
+      const memory = await createMemory(content, coverUrl, isPublic, userId)
+
+      return memory
     })
+  }
 
-    const { id } = paramSchema.parse(request.params)
+  function putMemory() {
+    return app.put('/memories/:id', async (request, reply) => {
+      const paramSchema = z.object({
+        id: z.string().uuid(),
+      })
 
-    const memory = await prisma.memory.findUniqueOrThrow({
-      where: {
-        id,
-      },
+      const { id } = paramSchema.parse(request.params)
+
+      const bodySchema = z.object({
+        content: z.string(),
+        coverUrl: z.string(),
+        isPublic: z.coerce.boolean().default(false),
+      })
+
+      const { content, coverUrl, isPublic } = bodySchema.parse(request.body)
+
+      let memory = await getMemoryByIdOrThrow(id)
+
+      if (memory.userId !== request.user.sub) {
+        return reply.status(401).send()
+      }
+
+      memory = await updateMemory(id, content, coverUrl, isPublic)
+
+      return memory
     })
+  }
 
-    return memory
-  })
+  function deleteMemory() {
+    return app.delete('/memories/:id', async (request, reply) => {
+      const paramSchema = z.object({
+        id: z.string().uuid(),
+      })
 
-  app.post('/memories', async (request) => {
-    const bodySchema = z.object({
-      content: z.string(),
-      coverUrl: z.string(),
-      isPublic: z.coerce.boolean().default(false),
+      const { id } = paramSchema.parse(request.params)
+
+      const memory = await getMemoryByIdOrThrow(id)
+
+      if (memory.userId !== request.user.sub) {
+        return reply.status(401).send()
+      }
+
+      removeMemory(id)
     })
-
-    const { content, coverUrl, isPublic } = bodySchema.parse(request.body)
-
-    const memory = await prisma.memory.create({
-      data: {
-        content,
-        coverUrl,
-        isPublic,
-        userId: '695c7d41-7de6-4c7d-b1b4-49c47cf87fdd',
-      },
-    })
-
-    return memory
-  })
-
-  app.put('/memories/:id', async (request) => {
-    const paramSchema = z.object({
-      id: z.string().uuid(),
-    })
-
-    const { id } = paramSchema.parse(request.params)
-
-    const bodySchema = z.object({
-      content: z.string(),
-      coverUrl: z.string(),
-      isPublic: z.coerce.boolean().default(false),
-    })
-
-    const { content, coverUrl, isPublic } = bodySchema.parse(request.body)
-
-    const memory = await prisma.memory.update({
-      where: {
-        id,
-      },
-      data: {
-        content,
-        coverUrl,
-        isPublic,
-      },
-    })
-
-    return memory
-  })
-
-  app.delete('/memories/:id', async (request) => {
-    const paramSchema = z.object({
-      id: z.string().uuid(),
-    })
-
-    const { id } = paramSchema.parse(request.params)
-
-    await prisma.memory.delete({
-      where: {
-        id,
-      },
-    })
-  })
+  }
 }
