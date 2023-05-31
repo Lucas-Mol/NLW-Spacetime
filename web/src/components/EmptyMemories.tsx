@@ -6,7 +6,7 @@ export function EmptyMemories() {
         <a href="" className="underline transition-colors hover:text-gray-50">
           criar agora
         </a>
-        !
+        !!!
       </p>
     </div>
   )
