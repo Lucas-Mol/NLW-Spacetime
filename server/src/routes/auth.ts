@@ -30,6 +30,8 @@ export async function authRoutes(app: FastifyInstance) {
 
     const token = getJWToken(app, user)
 
+    // console.log(`Token gerado: ${token}`) // while development
+
     return {
       token,
     }
