@@ -24,6 +24,7 @@ app.register(jwt, {
   secret: 'spacetime', // to do
 })
 app.register(authRoutes)
+app.register(uploadRoutes)
 app.register(memoriesRoutes)
 
 app.get('/', () => {
