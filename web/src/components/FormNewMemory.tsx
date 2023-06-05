@@ -45,25 +45,27 @@ export function FormNewMemory() {
   )
 }
 
-async function createMemory(formData: FormData) {
+async function createMemoryAndGetMemoryId(formData: FormData) {
   const token = `Bearer ${Cookie.get('token')}`
   const fileToUpload = formData.get('coverUrl')
 
   let coverUrl: string = ''
 
-  if (fileToUpload) {
+  if (fileToUpload instanceof File && fileToUpload?.name) {
     coverUrl = await getCoverUrlFromUploadedFile(fileToUpload, token)
   }
 
-  await postNewMemory(formData, coverUrl, token)
+  const data = await postNewMemory(formData, coverUrl, token)
+
+  return data
 }
 
 async function getCoverUrlFromUploadedFile(
-  fileEntry: string | File,
+  fileEntry: string | File | null,
   token: string,
 ) {
   const uploadFormData = new FormData()
-  uploadFormData.set('file', fileEntry)
+  uploadFormData.set('file', fileEntry || '')
 
   const uploadResponse = await api.post('/upload', uploadFormData, {
     headers: {
