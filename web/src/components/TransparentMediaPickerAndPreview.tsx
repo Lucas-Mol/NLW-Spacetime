@@ -44,13 +44,13 @@ export function TransparentMediaPickerAndPreview(props: Props) {
             alt=""
             className="aspect-video w-full rounded-lg object-cover"
           />
-        ) : (
+        ) : preview.mime.includes('video') ? (
           <video
             src={preview.url}
-            controls={true}
+            controls
             className="aspect-video w-full rounded-lg object-cover"
           />
-        ))}
+        ) : null)}
     </>
   )
 }
