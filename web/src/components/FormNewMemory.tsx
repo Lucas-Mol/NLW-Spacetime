@@ -21,9 +21,9 @@ export function FormNewMemory() {
 
     const formData = new FormData(event.currentTarget)
 
-    await createMemory(formData)
+    const newMemoryId = await createMemoryAndGetMemoryId(formData)
 
-    router.push('/')
+    router.push(`/memories/view?id=${newMemoryId}`)
   }
 
   const mediaInputId = 'media'
@@ -81,7 +81,7 @@ async function postNewMemory(
   coverUrl: string,
   token: string,
 ) {
-  api.post(
+  const response = await api.post(
     '/memories',
     {
       coverUrl,
@@ -94,4 +94,6 @@ async function postNewMemory(
       },
     },
   )
+
+  return response.data.id
 }
