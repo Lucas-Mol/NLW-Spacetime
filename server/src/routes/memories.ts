@@ -33,7 +33,11 @@ export async function memoriesRoutes(app: FastifyInstance) {
         return {
           id: memory.id,
           coverUrl: memory.coverUrl,
-          excerpt: memory.content.substring(0, 115).concat('...'),
+          excerpt:
+            memory.content.length < 115
+              ? memory.content
+              : memory.content.substring(0, 115).concat('...'),
+          createdAt: memory.createdAt,
         }
       })
     })
@@ -71,7 +75,9 @@ export async function memoriesRoutes(app: FastifyInstance) {
 
       const memory = await createMemory(content, coverUrl, isPublic, userId)
 
-      return memory
+      return {
+        id: memory.id,
+      }
     })
   }
 
