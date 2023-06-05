@@ -15,7 +15,11 @@ app.register(require('@fastify/static'), {
   prefix: '/uploads',
 })
 
-app.register(multipart)
+app.register(multipart, {
+  limits: {
+    fileSize: 25_242_880, // 25mb
+  },
+})
 
 app.register(cors, {
   origin: true, // to do
