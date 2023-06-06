@@ -2,16 +2,10 @@ import { BackwardLink } from '@/components/BackwardLink'
 import { MediaViewer } from '@/components/MediaViewer'
 import { TimerDash } from '@/components/TimerDash'
 
-import { api } from '@/lib/api'
 import { cookies } from 'next/headers'
 import { NextResponse } from 'next/server'
-
-interface Memory {
-  id: string
-  coverUrl: string
-  content: string
-  createdAt: string
-}
+import { Memory } from '@/lib/Memory'
+import { getMemoryById } from '@/lib/memoriesApi'
 
 interface Params {
   params: {
@@ -26,13 +20,7 @@ export default async function MemoryView({ params: { id } }: Params) {
     return NextResponse.redirect('/')
   }
 
-  const response = await api.get(`/memories/${id}`, {
-    headers: {
-      Authorization: `Bearer ${token}`,
-    },
-  })
-
-  const memory: Memory = response.data
+  const memory: Memory = await getMemoryById(id, token)
 
   return (
     <div className="flex flex-col gap-10 space-y-4 p-8">

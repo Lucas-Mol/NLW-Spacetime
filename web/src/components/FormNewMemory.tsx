@@ -1,7 +1,4 @@
 'use client'
-
-import { api } from '@/lib/api'
-
 import { FormEvent } from 'react'
 import { useRouter } from 'next/navigation'
 
@@ -12,6 +9,8 @@ import { TransparentMediaPickerAndPreview } from './TransparentMediaPickerAndPre
 import { SubmitButton } from './SubmitButton'
 
 import Cookie from 'js-cookie'
+import { postNewMemory } from '@/lib/memoriesApi'
+import { uploadFile } from '@/lib/uploadApi'
 
 export function FormNewMemory() {
   const router = useRouter()
@@ -52,48 +51,10 @@ async function createMemoryAndGetMemoryId(formData: FormData) {
   let coverUrl: string = ''
 
   if (fileToUpload instanceof File && fileToUpload?.name) {
-    coverUrl = await getCoverUrlFromUploadedFile(fileToUpload, token)
+    coverUrl = await uploadFile(fileToUpload, token)
   }
 
   const data = await postNewMemory(formData, coverUrl, token)
 
   return data
-}
-
-async function getCoverUrlFromUploadedFile(
-  fileEntry: string | File | null,
-  token: string,
-) {
-  const uploadFormData = new FormData()
-  uploadFormData.set('file', fileEntry || '')
-
-  const uploadResponse = await api.post('/upload', uploadFormData, {
-    headers: {
-      Authorization: token,
-    },
-  })
-
-  return uploadResponse.data.fileUrl
-}
-
-async function postNewMemory(
-  formData: FormData,
-  coverUrl: string,
-  token: string,
-) {
-  const response = await api.post(
-    '/memories',
-    {
-      coverUrl,
-      content: formData.get('content'),
-      isPublic: formData.get('isPublic'),
-    },
-    {
-      headers: {
-        Authorization: token,
-      },
-    },
-  )
-
-  return response.data.id
 }
