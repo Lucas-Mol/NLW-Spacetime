@@ -23,7 +23,7 @@ export function FormNewMemory() {
 
     const newMemoryId = await createMemoryAndGetMemoryId(formData)
 
-    router.push(`/memories/view?id=${newMemoryId}`)
+    router.push(`/memories/${newMemoryId}`)
   }
 
   const mediaInputId = 'media'

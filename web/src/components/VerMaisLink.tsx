@@ -8,10 +8,7 @@ interface Props {
 export function VerMaisLink({ id }: Props) {
   return (
     <Link
-      href={{
-        pathname: '/memories/view',
-        query: { id },
-      }}
+      href={`/memories/${id}`}
       className="flex items-center gap-2 text-sm text-gray-200 hover:text-gray-100"
     >
       Ler mais

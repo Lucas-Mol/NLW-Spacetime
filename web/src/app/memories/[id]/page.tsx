@@ -1,11 +1,10 @@
-'use client'
 import { BackwardLink } from '@/components/BackwardLink'
 import { MediaViewer } from '@/components/MediaViewer'
 import { TimerDash } from '@/components/TimerDash'
-import { api } from '@/lib/api'
 
-import Cookies from 'js-cookie'
-import { useRouter, useSearchParams } from 'next/navigation'
+import { api } from '@/lib/api'
+import { cookies } from 'next/headers'
+import { NextResponse } from 'next/server'
 
 interface Memory {
   id: string
@@ -14,17 +13,20 @@ interface Memory {
   createdAt: string
 }
 
-export default async function MemoryView() {
-  const router = useRouter()
-  const token = Cookies.get('token')
-  const params = useSearchParams()
-  const memoryId = params.get('id')
+interface Params {
+  params: {
+    id: string
+  }
+}
 
-  if (!token || !memoryId) {
-    router.push('/')
+export default async function MemoryView({ params: { id } }: Params) {
+  const token = cookies().get('token')?.value
+
+  if (!token || !id) {
+    return NextResponse.redirect('/')
   }
 
-  const response = await api.get(`/memories/${memoryId}`, {
+  const response = await api.get(`/memories/${id}`, {
     headers: {
       Authorization: `Bearer ${token}`,
     },
