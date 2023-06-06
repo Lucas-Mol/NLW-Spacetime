@@ -14,7 +14,7 @@ export function MemoriesTimeline({ memories }: Props) {
           <div key={memory.id} className="space-y-4">
             <TimerDash time={memory.createdAt} />
 
-            <MediaViewer url={memory.coverUrl} />
+            <MediaViewer url={memory.coverUrl} fullViewer={false} />
 
             <p className="text-lg leading-relaxed text-gray-100">
               {memory.excerpt}

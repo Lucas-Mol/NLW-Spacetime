@@ -28,7 +28,7 @@ export default async function MemoryView({ params: { id } }: Params) {
 
       <TimerDash time={memory.createdAt} />
 
-      <MediaViewer url={memory.coverUrl} />
+      <MediaViewer url={memory.coverUrl} fullViewer />
 
       <p className="text-lg leading-relaxed text-gray-100">{memory.content}</p>
     </div>
