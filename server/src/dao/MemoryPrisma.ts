@@ -19,6 +19,7 @@ export async function createMemory(
   content: string,
   coverUrl: string,
   isPublic: boolean,
+  createdAt: string,
   userId: string,
 ) {
   return await prisma.memory.create({
@@ -26,6 +27,7 @@ export async function createMemory(
       content,
       coverUrl,
       isPublic,
+      createdAt,
       userId,
     },
   })

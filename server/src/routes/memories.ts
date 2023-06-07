@@ -66,14 +66,23 @@ export async function memoriesRoutes(app: FastifyInstance) {
       const bodySchema = z.object({
         content: z.string(),
         coverUrl: z.string(),
+        createdAt: z.string(),
         isPublic: z.coerce.boolean().default(false),
       })
 
-      const { content, coverUrl, isPublic } = bodySchema.parse(request.body)
+      const { content, coverUrl, isPublic, createdAt } = bodySchema.parse(
+        request.body,
+      )
 
       const userId = request.user.sub
 
-      const memory = await createMemory(content, coverUrl, isPublic, userId)
+      const memory = await createMemory(
+        content,
+        coverUrl,
+        isPublic,
+        createdAt,
+        userId,
+      )
 
       return {
         id: memory.id,
