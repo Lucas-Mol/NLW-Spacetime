@@ -26,16 +26,19 @@ export async function getMemoryById(id: string, token: string) {
 }
 
 export async function postNewMemory(
-  formData: FormData,
+  content: string,
+  isPublic: boolean,
+  createdAt: string,
   coverUrl: string,
   token: string,
 ) {
   const response = await api.post(
     '/memories',
     {
+      content,
+      isPublic,
+      createdAt,
       coverUrl,
-      content: formData.get('content'),
-      isPublic: formData.get('isPublic'),
     },
     {
       headers: {
