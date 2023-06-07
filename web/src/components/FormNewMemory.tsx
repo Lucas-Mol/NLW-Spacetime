@@ -1,5 +1,5 @@
 'use client'
-import { FormEvent } from 'react'
+import { FormEvent, useState } from 'react'
 import { useRouter } from 'next/navigation'
 
 import { MediaInput } from './MediaInput'
@@ -11,16 +11,25 @@ import { SubmitButton } from './SubmitButton'
 import Cookie from 'js-cookie'
 import { postNewMemory } from '@/lib/memoriesApi'
 import { uploadFile } from '@/lib/uploadApi'
+import { MemoryDatePicker } from './MemoryDatePicker'
 
 export function FormNewMemory() {
   const router = useRouter()
+
+  const [selectedDate, setSelectedDate] = useState({
+    startDate: new Date(),
+    endDate: new Date(),
+  })
 
   async function handleCreateMemory(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
 
     const formData = new FormData(event.currentTarget)
 
-    const newMemoryId = await createMemoryAndGetMemoryId(formData)
+    const newMemoryId = await createMemoryAndGetMemoryId(
+      formData,
+      new Date(selectedDate.startDate),
+    )
 
     router.push(`/memories/${newMemoryId}`)
   }
@@ -33,6 +42,11 @@ export function FormNewMemory() {
         <MediaInput mediaInputId={mediaInputId} />
 
         <PublicCheckbox />
+
+        <MemoryDatePicker
+          selectedDate={selectedDate}
+          setSelectedDate={setSelectedDate}
+        />
       </div>
 
       <TransparentMediaPickerAndPreview mediaInputId={mediaInputId} />
@@ -44,7 +58,10 @@ export function FormNewMemory() {
   )
 }
 
-async function createMemoryAndGetMemoryId(formData: FormData) {
+async function createMemoryAndGetMemoryId(
+  formData: FormData,
+  selectedDate: Date,
+) {
   const token = `Bearer ${Cookie.get('token')}`
   const fileToUpload = formData.get('coverUrl')
 
@@ -54,7 +71,17 @@ async function createMemoryAndGetMemoryId(formData: FormData) {
     coverUrl = await uploadFile(fileToUpload, token)
   }
 
-  const data = await postNewMemory(formData, coverUrl, token)
+  const content = formData.get('content')?.toString()!
+  const isPublic = !!formData.get('isPublic')?.toString()!
+  const formatedDate = selectedDate.toISOString()
+
+  const data = await postNewMemory(
+    content,
+    isPublic,
+    formatedDate,
+    coverUrl,
+    token,
+  )
 
   return data
 }
