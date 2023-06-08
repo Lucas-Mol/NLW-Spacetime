@@ -6,32 +6,50 @@ interface Props {
 }
 
 export function MediaViewer({ url, fullViewer }: Props) {
+  const isImage = /\.(jpg|png|gif)$/.test(url)
+
   return (
     <>
       {url &&
-        (/\.(jpg|png|gif)$/.test(url) && !fullViewer ? (
-          <Image
-            src={url}
-            width={592}
-            height={280}
-            className="aspect-video w-full rounded-lg object-cover"
-            alt=""
-          />
-        ) : /\.(jpg|png|gif)$/.test(url) && fullViewer ? (
-          <Image
-            src={url}
-            width={592}
-            height={280}
-            className="w-full rounded-lg object-cover"
-            alt=""
-          />
-        ) : (
-          <video
-            src={url}
-            controls
-            className="aspect-video w-full rounded-lg object-cover"
-          />
-        ))}
+        (isImage && !fullViewer
+          ? imageVideoAspect(url)
+          : isImage && fullViewer
+          ? imageNoVideoAspect(url)
+          : video(url))}
     </>
+  )
+}
+
+function imageVideoAspect(url: string) {
+  return (
+    <Image
+      src={url}
+      width={592}
+      height={280}
+      className="aspect-video w-full rounded-lg object-cover"
+      alt=""
+    />
+  )
+}
+
+function imageNoVideoAspect(url: string) {
+  return (
+    <Image
+      src={url}
+      width={592}
+      height={280}
+      className="w-full rounded-lg object-cover"
+      alt=""
+    />
+  )
+}
+
+function video(url: string) {
+  return (
+    <video
+      src={url}
+      controls
+      className="aspect-video w-full rounded-lg object-cover"
+    />
   )
 }
