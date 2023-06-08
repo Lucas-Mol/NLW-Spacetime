@@ -38,11 +38,12 @@ export function FormNewMemory() {
 
   return (
     <form onSubmit={handleCreateMemory} className="flex flex-1 flex-col gap-2">
-      <div className="flex items-center gap-4">
-        <MediaInput mediaInputId={mediaInputId} />
+      <div className="mt-3 flex items-center justify-between gap-4">
+        <div className="flex items-center gap-6">
+          <MediaInput mediaInputId={mediaInputId} />
 
-        <PublicCheckbox />
-
+          <PublicCheckbox />
+        </div>
         <MemoryDatePicker
           selectedDate={selectedDate}
           setSelectedDate={setSelectedDate}
